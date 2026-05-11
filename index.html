@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FLASH: Efficient Visuomotor Policy via Sparse Sampling</title>
+
+  <meta name="description"
+        content="FLASH — a Fast Legendre-polynomial Action policy via Sparse History-anchored flow. State-of-the-art visuomotor manipulation with single-step inference.">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="FLASH: Efficient Visuomotor Policy via Sparse Sampling">
+  <meta property="og:description"
+        content="A single-step flow matching policy that runs in 31.40 ms — up to 175× faster than diffusion policies.">
+  <meta property="og:image" content="static/images/teaser.png">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=Source+Serif+Pro:wght@600;700&family=JetBrains+Mono&display=swap">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<!-- ============================================================ -->
+<!-- Hero / Title                                                 -->
+<!-- ============================================================ -->
+<header class="hero">
+  <div class="container">
+
+    <h1 class="hero__title">
+      FLASH: Efficient Visuomotor Policy<br>via Sparse Sampling
+    </h1>
+    <p class="hero__subtitle">
+      A <span class="flash-letter">F</span>ast <span class="flash-letter">L</span>egendre-polynomial <span class="flash-letter">A</span>ction policy via <span class="flash-letter">S</span>parse <span class="flash-letter">H</span>istory-anchored flow
+    </p>
+
+    <!-- Authors -->
+    <div class="authors">
+      <span class="authors__name">Jiaqi Bai<span class="authors__mark">*</span></span>,
+      <span class="authors__name">Jindou Jia<span class="authors__mark">*</span></span>,
+      <span class="authors__name">Yuxuan Hu</span>,
+      <span class="authors__name">Gen Li</span>,
+      <span class="authors__name">Xiangyu Chen</span>,
+      <span class="authors__name">Tuo An</span>,
+      <span class="authors__name">Kuangji Zuo</span>,
+      <span class="authors__name">Jianfei Yang<span class="authors__mark">&dagger;</span></span>
+    </div>
+
+    <p class="affiliation">
+      MARS Lab, Nanyang Technological University, Singapore
+    </p>
+
+    <p class="authors__note">
+      <span class="authors__mark">*</span> Equal contribution &nbsp;&middot;&nbsp;
+      <span class="authors__mark">&dagger;</span> Corresponding author
+    </p>
+
+    <!-- Action buttons -->
+    <div class="cta-row">
+      <a class="cta cta--disabled" href="#" aria-disabled="true">
+        Paper <span class="cta__badge">soon</span>
+      </a>
+      <a class="cta cta--disabled" href="#" aria-disabled="true">
+        arXiv <span class="cta__badge">soon</span>
+      </a>
+      <a class="cta cta--disabled" href="#" aria-disabled="true">
+        Code <span class="cta__badge">soon</span>
+      </a>
+    </div>
+
+  </div>
+</header>
+
+<!-- ============================================================ -->
+<!-- Abstract                                                     -->
+<!-- ============================================================ -->
+<section id="abstract">
+  <div class="container">
+    <h2 class="section__title">Abstract</h2>
+    <p class="section__lead">
+      Generative models such as diffusion and flow matching have become dominant
+      paradigms for visuomotor policy learning, yet their reliance on iterative
+      denoising incurs high inference latency incompatible with real-time
+      robotic control. We present a <b>Fast Legendre-polynomial Action policy
+      via Sparse History-anchored flow (FLASH)</b>, which replaces discrete
+      action-chunk generation with continuous <i>Legendre</i> polynomial
+      trajectory representation. Specifically, by fitting expert demonstrations
+      under sparse temporal sampling, FLASH enables a single inference to cover
+      a significantly extended action horizon. To further accelerate generation,
+      FLASH initiates the flow matching process from history polynomial
+      coefficients rather than uninformative <i>Gaussian</i> noise, shortening
+      the transport distance and enabling accurate single-step inference.
+      Moreover, analytic polynomial differentiation directly provides desired
+      velocity feed-forward signals to the torque controller without numerical
+      approximation. Extensive experiments on five simulated and two real-world
+      manipulation tasks demonstrate that FLASH achieves state-of-the-art
+      success rates (&ge;&nbsp;92% across all tasks), a per-episode inference
+      time of <b>31.40&nbsp;ms</b> (up to <b>175&times;</b> faster than
+      diffusion policies and <b>18&times;</b> faster than prior flow matching
+      policies), up to <b>4&times;</b> faster training convergence than ACT,
+      and <b>5&times; to 7&times;</b> reduction in controller tracking error
+      compared to discrete-action baselines.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- Key insight                                                  -->
+<!-- ============================================================ -->
+<section id="key-idea">
+  <div class="container">
+    <h2 class="section__title">From Noise-to-Action to Coefficient-to-Coefficient</h2>
+
+    <p class="section__lead">
+      Robot motions are inherently smooth and low-frequency &mdash; a short
+      <i>Legendre</i> polynomial can represent many discrete action points
+      with just a handful of coefficients. FLASH builds on this observation
+      in two ways:
+    </p>
+
+    <ul class="contrib-list">
+      <li>
+        <b>Sparse temporal sampling.</b> Fit polynomial coefficients at a
+        long temporal stride, so a single inference covers a much longer
+        action horizon without inflating the network's output dimensionality.
+      </li>
+      <li>
+        <b>History-anchored flow.</b> Initiate the flow from history
+        polynomial coefficients rather than Gaussian noise &mdash; the
+        transport distance becomes short enough for accurate single-step
+        generation (NFE = 1).
+      </li>
+      <li>
+        <b>Analytic velocity feed-forward.</b> Polynomial differentiation
+        directly produces desired velocity signals for the torque
+        controller, with no numerical approximation and no extra training
+        supervision.
+      </li>
+    </ul>
+
+    <figure>
+      <img src="static/images/teaser.png"
+           alt="FLASH overview: sparse sampling and coefficient-to-coefficient flow.">
+      <figcaption>
+        <b>Overview of FLASH.</b> <b>(a)</b> Expert trajectories are fitted
+        to polynomial coefficients under sparse temporal sampling; at
+        deployment we densely upsample, feeding both position and velocity to
+        the controller. <b>(b)</b> Conventional generative policies generate
+        discrete action points through multi-step denoising from noise;
+        FLASH transports <i>history</i> coefficients to <i>future</i>
+        coefficients in a single step.
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- Pipeline                                                     -->
+<!-- ============================================================ -->
+<section id="pipeline">
+  <div class="container">
+    <h2 class="section__title">Pipeline</h2>
+
+    <figure>
+      <img src="static/images/pipeline.png"
+           alt="FLASH inference and training pipeline.">
+      <figcaption>
+        <b>Inference (left).</b> Sparse history actions are fitted into
+        Legendre-polynomial coefficients and fused with visual features by a
+        DiT-style Flow Transformer. A single Euler step predicts future
+        coefficients, which are decoded into executable actions.
+        <b>Training (right).</b> Expert actions are converted into target
+        polynomial coefficients via OLS fitting and KKT correction; the model
+        is optimised with flow-matching and consistency losses.
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- Tasks                                                        -->
+<!-- ============================================================ -->
+<section id="tasks">
+  <div class="container">
+    <h2 class="section__title">Tasks</h2>
+
+    <p class="section__lead">
+      We evaluate FLASH on a <i>Franka</i> robot across <b>seven manipulation
+      tasks</b>: five simulated tasks on the
+      <a href="https://github.com/RoboVerseOrg/RoboVerse" target="_blank" rel="noopener">Roboverse</a>
+      platform &mdash; <i>Close Box</i>, <i>Pick Cube</i>, <i>Stack Cube</i>,
+      <i>Open Drawer</i>, <i>Pick-Place Bowl</i> &mdash; and two real-world
+      tasks <i>Place Cube</i> and <i>Insert Cube</i> with millimetre-level
+      insertion tolerance.
+    </p>
+
+    <figure>
+      <img src="static/images/tasks.png"
+           alt="Five simulated tasks and two real-world manipulation tasks.">
+      <figcaption>
+        <b>Left:</b> five simulated tasks from the <i>Roboverse</i> platform.
+        <b>Right:</b> two real-world manipulation tasks.
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- Main results table                                           -->
+<!-- ============================================================ -->
+<section id="results">
+  <div class="container">
+    <h2 class="section__title">Main Results</h2>
+
+    <p class="section__lead">
+      Success rates (%) on five simulated tasks at a shared training budget
+      of 10k optimiser steps. <b>NFE</b> denotes the number of generator
+      function sampling steps at inference. <b>Bold</b> = best,
+      <span class="second">underline</span> = second best. Each entry is
+      averaged over 50 independent rollouts.
+    </p>
+
+    <div class="table-wrap">
+      <table class="results">
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>NFE</th>
+            <th>Close Box</th>
+            <th>Pick Cube</th>
+            <th>Stack Cube</th>
+            <th>Open Drawer</th>
+            <th>Pick-Place Bowl</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Score-UNet</td>   <td>100</td><td>44</td><td>58</td><td>24</td><td>2</td><td>8</td></tr>
+          <tr><td>DDPM-UNet</td>    <td>100</td><td>84</td><td>68</td><td>44</td><td>76</td><td>90</td></tr>
+          <tr><td>DDIM-UNet</td>    <td>40</td> <td>80</td><td>74</td><td>42</td><td>76</td><td class="second">92</td></tr>
+          <tr><td>DDPM-DiT</td>     <td>100</td><td>68</td><td>78</td><td>36</td><td>50</td><td>76</td></tr>
+          <tr><td>FM-DiT</td>       <td>10</td> <td>70</td><td class="best">92</td><td>46</td><td>36</td><td>68</td></tr>
+          <tr><td>FM-UNet</td>      <td>10</td> <td>78</td><td>82</td><td>30</td><td>70</td><td>76</td></tr>
+          <tr><td>ACT</td>          <td>1</td>  <td>70</td><td class="best">98</td><td>20</td><td>80</td><td>0</td></tr>
+          <tr><td>VITA</td>         <td>6</td>  <td>94</td><td>86</td><td>86</td><td>68</td><td>86</td></tr>
+          <tr><td>A2A-Noise</td>    <td>1</td>  <td class="second">98</td><td>90</td><td class="second">92</td><td class="second">88</td><td class="second">92</td></tr>
+          <tr><td>FLASH-G</td>      <td>10</td> <td>70</td><td>94</td><td>82</td><td>62</td><td>88</td></tr>
+          <tr class="ours">
+            <td>FLASH (ours)</td>   <td>1</td>  <td>100</td><td>98</td><td>96</td><td>92</td><td>98</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="section__lead" style="margin-top:1.25rem;">
+      With single-step inference (NFE = 1), FLASH achieves &ge;&nbsp;92%
+      success on every task, beating the homologous FLASH-G (which differs
+      only by starting from Gaussian noise) by <b>17.6 pp on average</b>
+      &mdash; isolating the contribution of the history-anchored flow
+      mechanism &mdash; and the strongest single-step baseline A2A-Noise by
+      <b>4.8 pp on average</b>.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- Training efficiency                                          -->
+<!-- ============================================================ -->
+<section id="training">
+  <div class="container">
+    <h2 class="section__title">Training Efficiency</h2>
+
+    <p class="section__lead">
+      Beyond a higher performance ceiling, FLASH exhibits significantly
+      faster convergence. On <i>Pick Cube</i>, FLASH reaches 96% success in
+      just 2,500 steps &mdash; about <b>4&times; faster</b> than ACT, the
+      strongest baseline. On <i>Stack Cube</i>, FLASH is 30 percentage
+      points above the next-best policy at 6,250 steps. On <i>Pick-Place
+      Bowl</i>, FLASH stabilises at 100% success after 5,000 steps.
+    </p>
+
+    <figure>
+      <img src="static/images/training_efficiency.png"
+           alt="Training efficiency curves on three representative tasks.">
+      <figcaption>
+        Success rate versus training steps for three representative tasks.
+        FLASH converges substantially faster than every baseline.
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- Inference speed                                              -->
+<!-- ============================================================ -->
+<section id="speed">
+  <div class="container">
+    <h2 class="section__title">Inference Speed</h2>
+
+    <p class="section__lead">
+      All policies are run on the same machine (NVIDIA RTX 5090). FLASH
+      finishes a successful episode in <b>31.4&nbsp;ms</b> on average:
+      <b>175&times;</b> faster than Score-UNet (5,476&nbsp;ms),
+      <b>5.1&times;</b> faster than the homologous FLASH-G (159&nbsp;ms,
+      sparse sampling but noise-initialised), and <b>2.2&times;</b> faster
+      than the strongest baseline A2A-Noise (69&nbsp;ms).
+    </p>
+
+    <figure>
+      <img src="static/images/sim_exp.png"
+           alt="Inference time, tracking error, and post-hoc speed modulation in simulation.">
+      <figcaption>
+        <b>Left:</b> total episode inference time on <i>Stack Cube</i> across
+        11 policies; inset zooms the top-4 fastest.
+        <b>Middle:</b> sum of 7-joint absolute tracking errors on <i>Pick
+        Cube</i>; dashed lines mark task completion times.
+        <b>Right:</b> post-hoc speed modulation by sweeping the evaluation
+        stride <i>k</i><sub>eval</sub>; green/red bands denote the high-SR
+        plateau and failure zone.
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- Real-world / Tracking                                        -->
+<!-- ============================================================ -->
+<section id="real-world">
+  <div class="container">
+    <h2 class="section__title">Real-World: Insert Cube</h2>
+
+    <p class="section__lead">
+      The polynomial parameterisation gives the low-level controller an
+      analytic velocity feed-forward signal and a natively high-frequency
+      output. On the real-world <i>Insert Cube</i> task &mdash; with
+      millimetre-level tolerance &mdash; FLASH attains <b>100% success</b>,
+      leading seven baselines by an average of <b>47 pp</b>. Across five
+      real-world rollouts, FLASH's joint tracking MAE is
+      <b>0.274 &plusmn; 0.004&deg;</b>, compared with
+      <b>0.460 &plusmn; 0.028&deg;</b> for FM-DiT.
+    </p>
+
+    <figure>
+      <img src="static/images/insert_cube.png"
+           alt="Real-world Insert Cube task with execution snapshots and success-rate radar chart.">
+      <figcaption>
+        Execution snapshots (grasp &rarr; approach &rarr; insert) and
+        success-rate radar chart across 8 policies under millimetre-level
+        insertion tolerance.
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- Ablation                                                     -->
+<!-- ============================================================ -->
+<section id="ablation">
+  <div class="container">
+    <h2 class="section__title">Ablation Study</h2>
+
+    <figure>
+      <img src="static/images/ablation.png"
+           alt="Ablation results across FLASH's design choices.">
+      <figcaption>
+        Ablations isolating the contribution of each design choice: sparse
+        temporal sampling, history-anchored flow, cross-horizon
+        <i>C</i><sup>1</sup> continuity constraints, and the polynomial
+        consistency loss.
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- BibTeX                                                       -->
+<!-- ============================================================ -->
+<section id="bibtex" class="bibtex">
+  <div class="container">
+    <h2 class="section__title">BibTeX</h2>
+<pre>@article{flash2026,
+  title   = {FLASH: Efficient Visuomotor Policy via Sparse Sampling},
+  author  = {Bai, Jiaqi and Jia, Jindou and Hu, Yuxuan and Li, Gen and
+             Chen, Xiangyu and An, Tuo and Zuo, Kuangji and Yang, Jianfei},
+  year    = {2026},
+}</pre>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- Footer                                                       -->
+<!-- ============================================================ -->
+<footer>
+  <div class="container">
+    Website template adapted from
+    <a href="https://nerfies.github.io/" target="_blank" rel="noopener">Nerfies</a>.
+    Source code available
+    <a href="https://github.com/B1ue-Jay/FLASH" target="_blank" rel="noopener">on GitHub</a>.
+  </div>
+</footer>
+
+</body>
+</html>

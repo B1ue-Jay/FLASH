@@ -1,0 +1,319 @@
+/* ==========================================================================
+   FLASH Policy — project page styles
+   --------------------------------------------------------------------------
+   To re-skin the site, edit ONLY the CSS variables in :root below.
+   ========================================================================== */
+
+:root {
+  /* ----- Brand color (matches the figure palette) ----- */
+  --primary:        #4E8BC7;
+  --primary-dark:   #2E6FAE;
+  --primary-light:  #E8F0FA;
+
+  /* ----- Neutrals ----- */
+  --bg:             #ffffff;
+  --text:           #1a1a1a;
+  --text-muted:     #555555;
+  --border:         #e3e3e3;
+  --table-row-alt:  #fafafa;
+  --code-bg:        #f6f8fa;
+
+  /* ----- Typography ----- */
+  --font-body:      'Noto Sans', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-serif:     'Source Serif Pro', Georgia, 'Times New Roman', serif;
+  --font-mono:      'JetBrains Mono', 'SF Mono', Menlo, Monaco, Consolas, monospace;
+
+  /* ----- Layout ----- */
+  --max-width:      980px;
+  --side-padding:   1.5rem;
+  --section-gap:    3.5rem;
+  --radius:         6px;
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--primary-dark);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.15s;
+}
+a:hover { border-bottom-color: var(--primary-dark); }
+
+img { max-width: 100%; height: auto; display: block; }
+
+em, i { font-style: italic; }
+
+.container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 var(--side-padding);
+}
+
+/* ==========================================================================
+   Hero / title block
+   ========================================================================== */
+.hero {
+  padding: 4rem var(--side-padding) 2rem;
+  text-align: center;
+}
+
+.hero__title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.75rem, 4vw, 2.6rem);
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0 0 0.5rem;
+  color: var(--text);
+}
+
+.hero__subtitle {
+  font-size: 1.05rem;
+  color: var(--text-muted);
+  margin: 0 0 2rem;
+  font-weight: 400;
+}
+
+/* Highlight the F-L-A-S-H acronym letters in the subtitle.
+   Tune font-size (em = multiplier of surrounding text size) and color here. */
+.flash-letter {
+  font-weight: 700;
+  font-size: 1.35em;
+  color: var(--primary-dark);
+  font-style: normal;        /* keep upright even inside <i> */
+  letter-spacing: 0.01em;
+}
+
+/* ----- Authors ----- */
+.authors {
+  max-width: 800px;
+  margin: 0 auto 0.75rem;
+  font-size: 1.05rem;
+  line-height: 2;
+}
+
+.authors__name {
+  display: inline-block;
+  margin: 0 0.4rem;
+  white-space: nowrap;
+}
+
+.authors__mark {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.affiliation {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  margin: 0.5rem 0 0.5rem;
+}
+
+.authors__note {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0.25rem 0 2rem;
+}
+
+/* ----- Action buttons (Paper / Code / arXiv) ----- */
+.cta-row {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: 999px;
+  background: var(--text);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border: 1px solid var(--text);
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+}
+.cta:hover {
+  background: var(--primary-dark);
+  border-color: var(--primary-dark);
+  border-bottom-color: var(--primary-dark);
+  transform: translateY(-1px);
+}
+.cta--disabled {
+  background: #d0d0d0;
+  color: #ffffff;
+  border-color: #d0d0d0;
+  cursor: not-allowed;
+  pointer-events: none;
+  opacity: 0.85;
+}
+.cta__badge {
+  font-size: 0.7rem;
+  padding: 0.1rem 0.4rem;
+  background: rgba(255,255,255,0.25);
+  border-radius: 999px;
+  margin-left: 0.25rem;
+}
+
+/* ==========================================================================
+   Section blocks
+   ========================================================================== */
+section {
+  padding: var(--section-gap) 0;
+}
+
+section + section { border-top: 1px solid var(--border); }
+
+.section__title {
+  font-family: var(--font-serif);
+  font-size: 1.7rem;
+  font-weight: 700;
+  margin: 0 0 1.25rem;
+  text-align: center;
+  color: var(--text);
+}
+
+.section__lead {
+  font-size: 1.02rem;
+  color: var(--text);
+  line-height: 1.75;
+  text-align: justify;
+  hyphens: auto;
+}
+
+/* ----- Figures ----- */
+figure {
+  margin: 1.75rem 0 0.5rem;
+}
+figure img {
+  margin: 0 auto;
+  border-radius: var(--radius);
+}
+figcaption {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  text-align: center;
+  margin-top: 0.75rem;
+  line-height: 1.55;
+}
+figcaption b { color: var(--text); }
+
+/* ----- Bullet list of contributions ----- */
+.contrib-list {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0 0;
+}
+.contrib-list li {
+  position: relative;
+  padding: 0.6rem 0 0.6rem 2rem;
+  line-height: 1.65;
+}
+.contrib-list li::before {
+  content: "";
+  position: absolute;
+  left: 0.4rem;
+  top: 1rem;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--primary);
+}
+
+/* ==========================================================================
+   Results table
+   ========================================================================== */
+.table-wrap {
+  overflow-x: auto;
+  margin: 1.5rem 0 0.5rem;
+}
+
+table.results {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+table.results th,
+table.results td {
+  padding: 0.55rem 0.8rem;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+}
+table.results th {
+  background: var(--primary-light);
+  color: var(--text);
+  font-weight: 600;
+  border-bottom: 2px solid var(--primary);
+}
+table.results td:first-child,
+table.results th:first-child {
+  text-align: left;
+}
+table.results tr:nth-child(even) td { background: var(--table-row-alt); }
+table.results tr.ours td {
+  font-weight: 700;
+  background: var(--primary-light) !important;
+  color: var(--primary-dark);
+}
+table.results .best   { font-weight: 700; color: var(--primary-dark); }
+table.results .second { text-decoration: underline; }
+
+/* ==========================================================================
+   BibTeX
+   ========================================================================== */
+.bibtex pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  line-height: 1.6;
+  overflow-x: auto;
+  color: var(--text);
+}
+
+/* ==========================================================================
+   Footer
+   ========================================================================== */
+footer {
+  padding: 2rem var(--side-padding) 3rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+footer a { color: var(--text-muted); }
+footer a:hover { color: var(--primary-dark); }
+
+/* ==========================================================================
+   Responsive tweaks
+   ========================================================================== */
+@media (max-width: 640px) {
+  :root { --section-gap: 2.5rem; }
+  .hero { padding-top: 2.5rem; }
+  .section__lead { text-align: left; }
+  .cta { padding: 0.5rem 0.9rem; font-size: 0.9rem; }
+  table.results { font-size: 0.82rem; }
+  table.results th,
+  table.results td { padding: 0.45rem 0.5rem; }
+}
