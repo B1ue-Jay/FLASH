@@ -21,7 +21,7 @@
   <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=Source+Serif+Pro:wght@600;700&family=JetBrains+Mono&display=swap">
 
-  <link rel="stylesheet" href="style.css?v=4">
+  <link rel="stylesheet" href="style.css?v=5">
 </head>
 
 <body>
@@ -123,9 +123,9 @@
     </p>
 
     <!-- ---------- Region 1: real-world rollouts ---------- -->
-    <h3 class="subsection__title">Real-World Manipulation &mdash; FLASH vs. FM-DiT</h3>
+    <h3 class="subsection__title">Real-World Manipulation: FLASH vs. FM-DiT</h3>
     <p class="section__lead">
-      Side-by-side rollouts on two real-world <i>Franka</i> tasks &mdash;
+      Side-by-side rollouts on two real-world <i>Franka</i> tasks:
       <i>Insert Cube</i> and <i>Place Cube</i>. For each task we compare FLASH
       against <b>FM-DiT</b>, a representative flow-matching policy, under
       identical conditions.
@@ -134,16 +134,18 @@
     <!-- Insert Cube -->
     <div class="demo-task">
       <h4 class="demo-task__title">Insert Cube</h4>
-      <div class="vid-stack">
-        <figure class="vid vid--ours">
-          <video src="static/videos/insert_cube_flash.mp4"
-                 controls autoplay muted loop playsinline></video>
-          <figcaption>FLASH (ours)</figcaption>
-        </figure>
+      <div class="vid-row">
         <figure class="vid">
           <video src="static/videos/insert_cube_fmdit.mp4"
-                 controls autoplay muted loop playsinline></video>
+                 autoplay muted loop playsinline></video>
+          <span class="vid__badge">play at 2&times;</span>
           <figcaption>FM-DiT</figcaption>
+        </figure>
+        <figure class="vid vid--ours">
+          <video src="static/videos/insert_cube_flash.mp4"
+                 autoplay muted loop playsinline></video>
+          <span class="vid__badge">play at 2&times;</span>
+          <figcaption>FLASH (ours)</figcaption>
         </figure>
       </div>
     </div>
@@ -151,25 +153,33 @@
     <!-- Place Cube -->
     <div class="demo-task">
       <h4 class="demo-task__title">Place Cube</h4>
-      <div class="vid-stack">
-        <figure class="vid vid--ours">
-          <video src="static/videos/place_cube_flash.mp4"
-                 controls autoplay muted loop playsinline></video>
-          <figcaption>FLASH (ours)</figcaption>
-        </figure>
+      <div class="vid-row">
         <figure class="vid">
           <video src="static/videos/place_cube_fmdit.mp4"
-                 controls autoplay muted loop playsinline></video>
+                 autoplay muted loop playsinline></video>
+          <span class="vid__badge">play at 2&times;</span>
           <figcaption>FM-DiT</figcaption>
         </figure>
+        <figure class="vid vid--ours">
+          <video src="static/videos/place_cube_flash.mp4"
+                 autoplay muted loop playsinline></video>
+          <span class="vid__badge">play at 2&times;</span>
+          <figcaption>FLASH (ours)</figcaption>
+        </figure>
       </div>
+      <p class="section__lead demo-note">
+        For the task with longer trajectory, <b>FM-DiT</b> exhibits
+        noticeably more pauses, jitter, and discontinuities, slowing
+        execution speed and enlarging the end-effector tracking error. <b>FLASH</b>
+        markedly alleviates this, producing less jitter and smoother motion.
+      </p>
     </div>
 
     <!-- ---------- Region 2: post-hoc speed modulation ---------- -->
     <h3 class="subsection__title subsection__title--gap">Post-hoc Execution Speed Modulation</h3>
     <p class="section__lead">
       FLASH is trained <i>once</i>, yet its execution speed can be modulated
-      <b>post-hoc</b> at deployment &mdash; with no retraining. By reducing the
+      <b>post-hoc</b> at deployment with no retraining. By reducing the
       evaluation stride <i>k</i><sub>eval</sub> to a quarter of the training
       stride <i>k</i><sub>train</sub>, FLASH executes the same <i>Stack Cube</i>
       task <b>4&times; faster</b> while preserving the outcome.
@@ -179,12 +189,14 @@
       <div class="vid-pair">
         <figure class="vid">
           <video src="static/videos/stack_cube_1x.mp4"
-                 controls autoplay muted loop playsinline></video>
+                 autoplay muted loop playsinline></video>
+          
           <figcaption>1&times; execution speed</figcaption>
         </figure>
         <figure class="vid vid--ours">
           <video src="static/videos/stack_cube_4x.mp4"
-                 controls autoplay muted loop playsinline></video>
+                 autoplay muted loop playsinline></video>
+          
           <figcaption>4&times; execution speed</figcaption>
         </figure>
       </div>
@@ -490,6 +502,44 @@
     <a href="https://github.com/B1ue-Jay/FLASH" target="_blank" rel="noopener">on GitHub</a>.
   </div>
 </footer>
+
+<script>
+  // Synchronized looping: clips in the same comparison row restart together,
+  // and only once EVERY clip in that row has finished. A shorter clip holds on
+  // its last frame until its partner ends, then both replay from the start.
+  document.querySelectorAll('.vid-row, .vid-pair').forEach((row) => {
+    const vids = Array.from(row.querySelectorAll('video'));
+    if (!vids.length) return;
+
+    vids.forEach((v) => {
+      v.loop = false;       // take looping over from the browser
+      v.controls = false;   // no controls by default — so the bar never pops up on pause/end
+      v.addEventListener('mouseenter', () => { v.controls = true; });
+      v.addEventListener('mouseleave', () => { v.controls = false; });
+    });
+
+    const done = new Set();
+    const dead = new Set();
+
+    const maybeRestart = () => {
+      const live = vids.filter((v) => !dead.has(v));
+      if (!live.length) return;
+      if (live.every((v) => done.has(v))) {
+        done.clear();
+        live.forEach((v) => {
+          v.currentTime = 0;
+          const p = v.play();
+          if (p && p.catch) p.catch(() => {});
+        });
+      }
+    };
+
+    vids.forEach((v) => {
+      v.addEventListener('ended', () => { done.add(v); maybeRestart(); });
+      v.addEventListener('error', () => { dead.add(v); maybeRestart(); });
+    });
+  });
+</script>
 
 </body>
 </html>

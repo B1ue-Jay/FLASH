@@ -305,25 +305,25 @@ table.results .second { text-decoration: underline; }
   color: var(--primary-dark);
 }
 
-/* Region 1 — real-world: FLASH stacked above FM-DiT, fixed display size */
-.vid-stack {
+/* Region 1 — real-world: FM-DiT (left) vs FLASH (right), side by side */
+.vid-row {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.25rem;
 }
-.vid-stack .vid { width: 100%; max-width: 560px; }
+.vid-row .vid { flex: 1 1 380px; max-width: 460px; }
 
-/* Region 2 — execution speed: 1x and 4x side by side */
+/* Region 2 — execution speed: 1x (left) and 4x (right), side by side */
 .vid-pair {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 1.5rem;
 }
-.vid-pair .vid { flex: 0 1 340px; max-width: 340px; }
+.vid-pair .vid { flex: 0 1 300px; max-width: 320px; }
 
-.vid { margin: 0; text-align: center; }
+.vid { position: relative; margin: 0; text-align: center; }
 .vid video {
   width: 100%;
   height: auto;
@@ -345,10 +345,31 @@ table.results .second { text-decoration: underline; }
   font-weight: 600;
 }
 
+/* "2x speed" watermark, pinned to the top-right corner inside each clip */
+.vid__badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 0.16rem 0.5rem;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+  border-radius: 999px;
+  pointer-events: none;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+/* Explanatory note under a comparison row */
+.demo-note { margin-top: 1rem; font-size: 0.96rem; }
+
 @media (max-width: 640px) {
-  .vid-stack .vid { max-width: 100%; }
-  .vid-pair { gap: 1rem; }
+  .vid-row .vid,
   .vid-pair .vid { flex-basis: 100%; max-width: 100%; }
+  .vid-pair { gap: 1rem; }
 }
 
 /* ==========================================================================
