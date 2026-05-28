@@ -127,7 +127,42 @@ em, i { font-style: italic; }
 .authors__note {
   font-size: 0.85rem;
   color: var(--text-muted);
-  margin: 0.25rem 0 2rem;
+  margin: 0.25rem 0 1.25rem;
+}
+
+/* ----- Affiliation logos ----- */
+.affiliation-logos {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2.5rem;
+  flex-wrap: wrap;
+  margin: 0.5rem 0 1.5rem;
+}
+
+.affiliation-logo {
+  width: auto;
+  object-fit: contain;
+}
+
+.affiliation-logo--ntu {
+  height: 90px;
+}
+
+.affiliation-logo--mars {
+  height: 56px;
+}
+
+@media (max-width: 600px) {
+  .affiliation-logos {
+    gap: 1.5rem;
+  }
+  .affiliation-logo--ntu {
+    height: 68px;
+  }
+  .affiliation-logo--mars {
+    height: 42px;
+  }
 }
 
 /* ----- Action buttons (Paper / Code / arXiv) ----- */
